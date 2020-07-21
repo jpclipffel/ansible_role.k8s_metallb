@@ -1,0 +1,73 @@
+- name: Assertions
+  assert:
+    that:
+      - k8s_primary_master_name is defined
+      - k8s_node_type is defined
+      - k8s_metallb_pools | default([]) | length > 0
+  tags: [never, apply, delete]
+
+
+- name: Get MetalLB memberlist secret
+  shell: >
+    kubectl get -n {{ k8s_metallb_namespace }} secrets memberlist
+  register: _get_memberlist
+  ignore_errors: yes
+  when:
+    - inventory_hostname == k8s_primary_master_name
+  tags: [never, apply, delete]
+
+
+- name: Apply MetalLB
+  shell: >
+    kubectl apply -f {{ manifest }}
+  when:
+    - inventory_hostname == k8s_primary_master_name
+  loop:
+    - "{{ k8s_metallb_manifest_namespace }}"
+    - "{{ k8s_metallb_manifest_metallb }}"
+
+
+- name: Create MetalLB memberlist secret
+  shell: >
+    kubectl create secret generic -n {{ k8s_metallb_namespace }} memberlist --from-literal=secretkey="$(openssl rand -base64 128)"
+  when:
+    - inventory_hostname == k8s_primary_master_name
+    - _get_memberlist.rc != 0
+  tags: [never, apply]
+
+
+- name: Apply MetalLB configuration
+  k8s:
+    resource_definition: "{{ lookup('template', 'configmap.yml.j2') | from_yaml | to_nice_yaml }}"
+  when:
+    - inventory_hostname == k8s_primary_master_name
+  tags: [never, apply]
+
+# ---
+
+- name: Delete MetalLB configuration
+  shell: >
+    kubectl -n {{ k8s_metallb_namespace }} delete configmaps config
+  when:
+    - inventory_hostname == k8s_primary_master_name
+  tags: [never, delete]
+
+
+- name: Delete MetalLB
+  shell: >
+    kubectl delete -f {{ manifest }}
+  when:
+    - inventory_hostname == k8s_primary_master_name
+  loop:
+    - "{{ k8s_metallb_manifest_namespace }}"
+    - "{{ k8s_metallb_manifest_metallb }}"
+  tags: [never, delete]
+
+
+- name: Delete MetalLB secret
+  shell:
+    kubectl delete secret -n {{ k8s_metallb_namespace }}
+  when:
+    - inventory_hostname == k8s_primary_master_name
+    - _get_memberlist.rc == 0
+  tags: [never, delete]

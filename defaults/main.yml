@@ -1,0 +1,10 @@
+# MetalLB version
+k8s_metallb_version: "0.9.3"
+
+# MetalLB manifests
+k8s_metallb_manifest_namespace: "https://raw.githubusercontent.com/metallb/metallb/v{{ k8s_metallb_version }}/manifests/namespace.yaml"
+k8s_metallb_manifest_metallb: "https://raw.githubusercontent.com/metallb/metallb/v{{ k8s_metallb_version }}/manifests/metallb.yaml"
+
+# MetalLB namespace
+# Must be inline with {{ k8s_metallb_manifest_namespace }}
+k8s_metallb_namespace: "metallb-system"
