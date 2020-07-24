@@ -19,12 +19,13 @@
 
 - name: Apply MetalLB
   shell: >
-    kubectl apply -f {{ manifest }}
+    kubectl apply -f {{ item }}
   when:
     - inventory_hostname == k8s_primary_master_name
   loop:
     - "{{ k8s_metallb_manifest_namespace }}"
     - "{{ k8s_metallb_manifest_metallb }}"
+  tags: [never, apply]
 
 
 - name: Create MetalLB memberlist secret
@@ -48,6 +49,7 @@
 - name: Delete MetalLB configuration
   shell: >
     kubectl -n {{ k8s_metallb_namespace }} delete configmaps config
+  ignore_errors: yes
   when:
     - inventory_hostname == k8s_primary_master_name
   tags: [never, delete]
@@ -55,9 +57,10 @@
 
 - name: Delete MetalLB
   shell: >
-    kubectl delete -f {{ manifest }}
+    kubectl delete -f {{ item }}
   when:
     - inventory_hostname == k8s_primary_master_name
+  ignore_errors: yes
   loop:
     - "{{ k8s_metallb_manifest_namespace }}"
     - "{{ k8s_metallb_manifest_metallb }}"
@@ -67,6 +70,7 @@
 - name: Delete MetalLB secret
   shell:
     kubectl delete secret -n {{ k8s_metallb_namespace }}
+  ignore_errors: yes
   when:
     - inventory_hostname == k8s_primary_master_name
     - _get_memberlist.rc == 0
