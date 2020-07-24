@@ -27,10 +27,12 @@ MetalLB pools configuration is encoded into Ansible variables (e.g. in inventori
 k8s_metallb_pools:
   - name: production
     protocol: layer2
-    addresses: "172.29.252.180-172.29.252.181"
+    addresses:
+      - "172.29.252.180-172.29.252.181"
   - name: test
     protocol: layer2
-    addresses: "172.29.252.178-172.29.252.179"
+    addresses:
+      - "172.29.252.178-172.29.252.179"
 ```
 
 ## Templates
