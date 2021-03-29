@@ -5,6 +5,10 @@ metadata:
   namespace: "{{ k8s_metallb_namespace }}"
 data:
   config: |
+    peers:
+{% for pool in k8s_metallb_peers %}
+    - {{ pool | to_nice_yaml(indent=2) | trim | indent(6) }}
+{% endfor %}
     address-pools:
 {% for pool in k8s_metallb_pools %}
     - {{ pool | to_nice_yaml(indent=2) | trim | indent(6) }}

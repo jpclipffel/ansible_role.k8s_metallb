@@ -8,3 +8,9 @@ k8s_metallb_manifest_metallb: "https://raw.githubusercontent.com/metallb/metallb
 # MetalLB namespace
 # Must be inline with {{ k8s_metallb_manifest_namespace }}
 k8s_metallb_namespace: "metallb-system"
+
+# MetallB default peers
+k8s_metallb_peers: []
+
+# MetallB default pools
+k8s_metallb_pools: []
